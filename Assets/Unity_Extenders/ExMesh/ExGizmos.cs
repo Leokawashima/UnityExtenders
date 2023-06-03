@@ -152,6 +152,9 @@ public class ExGizmos : MonoBehaviour
     }
     void OnDrawGizmos()
     {
+#if UNITY_EDITOR
+        if(!gameObject.activeInHierarchy) return;
+#endif
         Gizmos.color = color;
         if(tf == null) tf = transform;
         if(!onWireMode)     Gizmos.DrawMesh(mesh, tf.position, tf.rotation, tf.localScale);

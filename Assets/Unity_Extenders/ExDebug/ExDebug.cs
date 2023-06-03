@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if UNITY_EDITOR
+using UnityEngine;
 
 /// <summary>
 /// デバッグログのリッチテキストをテキトーに使いやすそうにした静的クラス
@@ -38,7 +39,7 @@ public static class ExDebug
     { Debug.LogError($"<color=#{ColorUtility.ToHtmlStringRGBA(color)}><size={size}>{text}</size></color>"); }
     #endregion LogError
 }
-
+#endif
 /// (Debugクラス拡張メソッドを定義しようとしたがデバッグクラスはインスタンスを使わないから拡張メソッドを定義しても使えないので別クラスでてきとーに包んだ)
 /// 以下　自分への備忘録
 /// <size=hoge> </size>     サイズ変更
