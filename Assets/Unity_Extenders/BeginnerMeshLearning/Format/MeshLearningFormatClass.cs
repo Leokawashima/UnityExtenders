@@ -1,5 +1,8 @@
 ﻿using UnityEngine;
+
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 /// <summary>
 /// 解説フォーマットクラス　継承先を一つ噛ませてコンストラクタで名前を代入すること。
@@ -19,6 +22,7 @@ public abstract class MeshLearningFormatClass : MonoBehaviour
     protected static Color orange { get { return new Color(1.0f, 0.65f, 0, 1.0f); } }
     protected static Color purple { get { return new Color(0.5f, 0, 0.5f, 1.0f); } }
 
+#if UNITY_EDITOR
     [ContextMenu("CleanUp")]
     protected void CleanUp()
     {
@@ -30,7 +34,7 @@ public abstract class MeshLearningFormatClass : MonoBehaviour
         DestroyImmediate(go.GetComponent<MeshRenderer>());
         DestroyImmediate(go.GetComponent<MeshFilter>());
     }
-
+#endif
     protected void Reset()
     {
         if(!meshFilter)
@@ -75,6 +79,7 @@ public abstract class BeginnerMeshLearningFormatClass : MeshLearningFormatClass
         MaterialName = "星型メッシュマテリアル";
     }
 }
+#if UNITY_EDITOR
 /// <summary>
 /// 徹底解説クラスエディター
 /// </summary>
@@ -90,4 +95,4 @@ public class BeginnerMeshEditor : Editor
             b_mesh.BeginnerCreateMesh();
     }
 }
-
+#endif

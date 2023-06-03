@@ -1730,6 +1730,10 @@ public static class ExMesh
 
     #endregion Special
 
+    //未完成　ExMeshから関数を呼んでメッシュを生成したい時に、
+    //「変数が誤っていないか」「頂点数を余りにも多く指定していないか」等を調べてDebug.Logする
+    //命名規則を更新できていなかったり特殊形状メッシュの関数は用意できていないのでまだ気休め程度にしか使えない
+#if UNITY_EDITOR
     #region CheckVariavle
     /// <summary>
     /// 扇形メッシュを生成する為の変数の精査を行う関数
@@ -1854,4 +1858,5 @@ public static class ExMesh
         return CheckVariableFanTorusMesh(angle, s_range, e_range, Mathf.CeilToInt(angle));
     }
     #endregion CheckVariavle
+#endif
 }
