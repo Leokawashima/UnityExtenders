@@ -1,104 +1,69 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System;
+﻿using System;
 using UnityEngine;
 using UnityEditor;
 
 namespace ExUnityEditor
 {
-    /// <summary>
-    /// ヘッダーに関連する処理をまとめるスコープusingステートメント　終わりに疑似ラインを引くコンストラクタ有り
-    /// </summary>
     public class ExHeaderGroup : IDisposable
     {
-        private bool onDraw = false;
-        private Color color;
-        private float height = 0;
-        private float offset = 0;
+        private bool m_drawLine = false;
+        private Color m_color;
+        private float m_height;
+        private float m_offset;
 
-        const float Defline = 4.0f;
+        const float DEFAULT_HEIGHT = 4.0f;
 
-        public ExHeaderGroup(Color line_color)
+        public ExHeaderGroup(Color lineColor_, float lineOffset_ = 1.0f)
         {
-            onDraw = true;
-            color = line_color;
-            height = Defline;
+            m_drawLine = true;
+            m_color = lineColor_;
+            m_height = DEFAULT_HEIGHT;
+            m_offset = lineOffset_;
         }
 
-        public ExHeaderGroup(Color line_color, float line_offset)
+        public ExHeaderGroup(float lineHeight_, Color lineColor_, float lineOffset_ = 1.0f)
         {
-            onDraw = true;
-            color = line_color;
-            height = Defline;
-            offset = line_offset;
+            m_drawLine = true;
+            m_color = lineColor_;
+            m_height = lineHeight_;
+            m_offset = lineOffset_;
         }
 
-        public ExHeaderGroup(float line_height, Color line_color)
+        public ExHeaderGroup(string title_, GUIStyle style_)
         {
-            onDraw = true;
-            color = line_color;
-            height = line_height;
+            EditorGUILayout.LabelField(title_, style_);
         }
 
-        public ExHeaderGroup(float line_height, Color line_color, float line_offset)
+        public ExHeaderGroup(string title_, GUIStyle style_, Color lineColor_, float lineOffset_ = 1.0f)
         {
-            onDraw = true;
-            color = line_color;
-            height = line_height;
-            offset = line_offset;
+            EditorGUILayout.LabelField(title_, style_);
+            m_drawLine = true;
+            m_color = lineColor_;
+            m_height = DEFAULT_HEIGHT;
+            m_offset = lineOffset_;
         }
 
-        public ExHeaderGroup(string title, GUIStyle style)
+        public ExHeaderGroup(string title_, GUIStyle style_, float lineHeight_, Color lineColor_, float lineOffset = 1.0f)
         {
-            EditorGUILayout.LabelField(title, style);
-        }
-
-        public ExHeaderGroup(string title, GUIStyle style, Color line_color)
-        {
-            EditorGUILayout.LabelField(title, style);
-            onDraw = true;
-            color = line_color;
-            height = Defline;
-        }
-
-        public ExHeaderGroup(string title, GUIStyle style, Color line_color, float line_offset)
-        {
-            EditorGUILayout.LabelField(title, style);
-            onDraw = true;
-            color = line_color;
-            height = Defline;
-            offset = line_offset;
-        }
-
-        public ExHeaderGroup(string title, GUIStyle style, float line_height, Color line_color)
-        {
-            EditorGUILayout.LabelField(title, style);
-            onDraw = true;
-            color = line_color;
-            height = line_height;
-        }
-
-        public ExHeaderGroup(string title, GUIStyle style, float line_height, Color line_color, float line_offset)
-        {
-            EditorGUILayout.LabelField(title, style);
-            onDraw = true;
-            color = line_color;
-            height = line_height;
-            offset = line_offset;
+            EditorGUILayout.LabelField(title_, style_);
+            m_drawLine = true;
+            m_color = lineColor_;
+            m_height = lineHeight_;
+            m_offset = lineOffset;
         }
 
         public void Dispose()
         {
-            Rect last = GUILayoutUtility.GetLastRect();
-            Rect draw;
-            if(onDraw)
-            {
-                draw = new Rect(0, last.y + last.height + 3.0f + offset, EditorGUIUtility.currentViewWidth, height);
-                GUILayoutUtility.GetRect(draw.width, draw.height + 6.0f);
-                GUI.backgroundColor = color;
-                GUI.Box(draw, "");
-                GUI.backgroundColor = Color.white;
-            }
+            if (false == m_drawLine) return;
+
+            var _last = GUILayoutUtility.GetLastRect();
+            var _draw = new Rect(0, _last.y + _last.height + 3.0f + m_offset, EditorGUIUtility.currentViewWidth, m_height);
+            GUILayoutUtility.GetRect(_draw.width, _draw.height + 6.0f);
+
+            var _forward = GUI.backgroundColor;
+            GUI.backgroundColor = m_color;
+            GUI.Box(_draw, "");
+            GUI.backgroundColor = _forward;
         }
     }
 }
