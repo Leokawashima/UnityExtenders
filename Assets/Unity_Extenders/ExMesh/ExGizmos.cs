@@ -4,6 +4,7 @@
 /// ギズモを描くクラス
 /// </summary>
 [AddComponentMenu("Mesh/ExGizmos")]
+
 public class ExGizmos : MonoBehaviour
 {
     #region Variable
