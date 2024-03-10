@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections;
+using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using TMPro;
-using Unity.VisualScripting.Dependencies.NCalc;
+using Unity.VisualScripting;
 #if UNITY_EDITOR
 using UnityEditor;
-using UnityEditor.Callbacks;
 using UnityEditor.IMGUI.Controls;
 #endif
 using UnityEngine;
@@ -24,8 +20,8 @@ namespace GaMe.ExMesh
         [SerializeField] private Transform m_transform = null;
         public Transform Transform { get =>  m_transform; set => m_transform = value; }
 
-        [SerializeField] private Matrix4x4 m_matrix = Matrix4x4.identity;
-        public Matrix4x4 Matrix { get => m_matrix; set => m_matrix = value;}
+        [SerializeField] private ExGizmosDrawContext m_context = ExGizmosDrawContext.Identity;
+        public ExGizmosDrawContext Context { get => m_context; set => m_context = value; }
 
         [SerializeField] private Vector3 m_position = Vector3.zero;
         public Vector3 Position { get => m_position; set => m_position = value; }
@@ -35,9 +31,6 @@ namespace GaMe.ExMesh
 
         [SerializeField] private Vector3 m_scale = Vector3.one;
         public Vector3 Scale { get => m_scale; set => m_scale = value; }
-
-        [SerializeField] private Color m_color = Color.green;
-        public Color Color { get => m_color; set => m_color = value; }
 
         public enum DrawState
         {
@@ -49,30 +42,63 @@ namespace GaMe.ExMesh
         [SerializeField] private DrawState m_drawMode = DrawState.Default;
         public DrawState DrawMode { get => m_drawMode; set => m_drawMode = value; }
 
-        [SerializeField] private Mesh m_mesh = null;
-        public Mesh Mesh { get => m_mesh;  set => m_mesh = value; }
-
-        [SerializeField] private int m_subMeshIndex = -1;
-        public int SubMeshIndex { get => m_subMeshIndex; set => m_subMeshIndex = value; }
-
-        [SerializeReference] private List<ExGizmosDrawElement> m_drawElements = new();
-        public List<ExGizmosDrawElement> DrawElements { get => m_drawElements; set => m_drawElements = value; }
+        [SerializeReference] private List<IExGizmosDrawElement> m_drawElements = new();
+        public List<IExGizmosDrawElement> DrawElements { get => m_drawElements; set => m_drawElements = value; }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void Draw(ExGizmos gizmos_)
         {
-            if (gizmos_.Enabled)
+            if (false == gizmos_.Enabled)
             {
-                var _forward = Gizmos.color;
+                return;
+            }
 
-                var _drawElements = gizmos_.m_drawElements;
-                foreach (var element in _drawElements)
+            var _exColor = Gizmos.color;
+            var _exMatrix = Gizmos.matrix;
+
+            var _drawElements = gizmos_.m_drawElements;
+            foreach (var element in _drawElements)
+            {
+                if (element.Enabled)
                 {
-                    element.Draw(element.Matrix);
+                    continue;
                 }
 
-                Gizmos.color = _forward;
+                if (element is IExGizmosWire wire)
+                {
+                    switch (gizmos_.DrawMode)
+                    {
+                        case DrawState.Default:
+                            {
+                                if (wire.IsWire)
+                                {
+                                    wire.DrawWire(gizmos_.Context);
+                                }
+                                else
+                                {
+                                    element.Draw(gizmos_.Context);
+                                }
+                                break;
+                            }
+                        case DrawState.ForcePlane:
+                            {
+                                element.Draw(gizmos_.Context);
+                                break;
+                            }
+                        case DrawState.ForceWire:
+                            {
+                                wire.DrawWire(gizmos_.Context);
+                                break;
+                            }
+                    }
+                }
+                else
+                {
+                    element.Draw(gizmos_.m_context);
+                }
             }
+
+            Gizmos.color = _exColor;
         }
     }
 
@@ -83,27 +109,17 @@ namespace GaMe.ExMesh
     public class ExGizmosDrawer : PropertyDrawer
     {
         private static Color s_bgColor = new(0.2f, 0.4f, 0.3f);
-        private static readonly float s_singleLine = EditorGUIUtility.singleLineHeight;
-        private static ExGizmosDrawElement[] s_subClass = 
-            Assembly.GetAssembly(typeof(ExGizmosDrawElement))
-                .GetTypes()
-                .Where(type_ => type_.IsSubclassOf(typeof(ExGizmosDrawElement)) && false == type_.IsAbstract)
-                .Select(type_ => Activator.CreateInstance(type_) as ExGizmosDrawElement)
-                .ToArray();
-
-        private static float GetPropertyHeight(SerializedProperty prop_)
-        {
-            return EditorGUI.GetPropertyHeight(prop_, true) + EditorGUIUtility.standardVerticalSpacing;
-        }
+        private static Type[] s_elementsClasses = ExGizmosUtility.GetInterfaceDerivedClassTypes<IExGizmosDrawElement>();
 
         public override void OnGUI(Rect pos_, SerializedProperty prop_, GUIContent label_)
         {
             var _serialObj = prop_.serializedObject;
             _serialObj.Update();
 
-            var _singleLine = s_singleLine;
-            var _lineHeight = s_singleLine + EditorGUIUtility.standardVerticalSpacing;
+            var _singleLine = ExGizmosEditorUtility.SINGLE_LINE_HEIGHT;
+            var _lineHeight = _singleLine + ExGizmosEditorUtility.VERTICAL_SPACING;
             var _width = EditorGUILayout.GetControlRect().width;
+
             pos_.height = _singleLine;
 
             {//BG
@@ -113,8 +129,7 @@ namespace GaMe.ExMesh
                     _rect.x -= 13;
                     _rect.y -= 2;
                     _rect.width += 13;
-                    _rect.height += 4;
-
+                    _rect.height += 6;
                 }
                 EditorGUI.DrawRect(_rect, s_bgColor);
             }
@@ -131,6 +146,10 @@ namespace GaMe.ExMesh
                 var _prop = prop_.FindPropertyRelative("m_enabled");
                 _prop.boolValue = EditorGUI.Toggle(_rect, _prop.boolValue);
 
+                if (_serialObj.FindProperty(fieldInfo.Name).isArray)
+                {
+                    pos_.y += 6;
+                }
                 pos_.y += _lineHeight;
             }
 
@@ -165,9 +184,9 @@ namespace GaMe.ExMesh
                 }
 
                 {
-                    var _prop = prop_.FindPropertyRelative("m_color");
-                    _prop.colorValue = EditorGUI.ColorField(pos_, new GUIContent("Color"), _prop.colorValue);
-                    pos_.y += _lineHeight;
+                    var _prop = prop_.FindPropertyRelative("m_context");
+                    EditorGUI.PropertyField(pos_, _prop);
+                    pos_.y += GetPropertyHeight(_prop);
                 }
 
                 {
@@ -186,11 +205,12 @@ namespace GaMe.ExMesh
                     if (GUI.Button(pos_, "Add DrawElement"))
                     {
                         var _dropdown = new ExGizmosDrawElementAdvancedDropdown(
-                            new AdvancedDropdownState(), _serialObj, _OnCallback
-                            );
+                            new AdvancedDropdownState(),
+                            _OnCallback
+                        );
                         _dropdown.Show(pos_);
 
-                        void _OnCallback(ExGizmosDrawElement element_)
+                        void _OnCallback(Type selectedElementType_)
                         {
                             _serialObj.Update();
                             var _elements = prop_.FindPropertyRelative("m_drawElements");
@@ -198,7 +218,8 @@ namespace GaMe.ExMesh
                             _elements.InsertArrayElementAtIndex(_index);
 
                             var _prop = _elements.GetArrayElementAtIndex(_index);
-                            _prop.boxedValue = element_;
+                            var _elementInstance = Activator.CreateInstance(selectedElementType_);
+                            _prop.boxedValue = _elementInstance;
                             {
                                 var _ena = _prop.FindPropertyRelative("m_enabled");
                                 _ena.boolValue = true;
@@ -214,18 +235,28 @@ namespace GaMe.ExMesh
 
             _serialObj.ApplyModifiedProperties();
         }
+
+        private static float GetPropertyHeight(SerializedProperty prop_)
+        {
+            return EditorGUI.GetPropertyHeight(prop_, true) + ExGizmosEditorUtility.VERTICAL_SPACING;
+        }
+
         public override float GetPropertyHeight(SerializedProperty prop_, GUIContent label_)
         {
-            var _lineHeight = s_singleLine + EditorGUIUtility.standardVerticalSpacing;
+            var _lineHeight = ExGizmosEditorUtility.SINGLE_LINE_HEIGHT_SPACING;
             var _height = 0.0f;
 
             if (prop_.isExpanded)
             {
+                if (prop_.serializedObject.FindProperty(fieldInfo.Name).isArray)
+                {
+                    _height += 6;
+                }
                 _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_transform"));
                 _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_position"));
                 _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_rotation"));
                 _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_scale"));
-                _height += _lineHeight; // color
+                _height += GetPropertyHeight(prop_.FindPropertyRelative("m_context"));
                 _height += _lineHeight; // enum
                 _height += GetPropertyHeight(prop_.FindPropertyRelative("m_drawElements"));
                 _height += _lineHeight; // button
@@ -234,28 +265,15 @@ namespace GaMe.ExMesh
             return _height;
         }
 
-        //[DidReloadScripts]
-        //private static void OnReloadScripts()
-        //{
-        //    var _type = typeof(ExGizmosDrawElement);
-        //    s_subClass = Assembly.GetAssembly(_type)
-        //        .GetTypes()
-        //        .Where(type_ => type_.IsSubclassOf(_type) && false == type_.IsAbstract)
-        //        .Select(type_ => Activator.CreateInstance(type_) as ExGizmosDrawElement)
-        //        .ToArray();
-        //}
-
         public class ExGizmosDrawElementAdvancedDropdown : AdvancedDropdown
         {
-            private SerializedObject m_serialObj;
-            private Dictionary<int, ExGizmosDrawElement> m_drawElementsDict = new();
-            private Action<ExGizmosDrawElement> m_callback;
+            private Dictionary<int, Type> m_drawElementsDict = new();
+            private Action<Type> m_callback;
 
-            public ExGizmosDrawElementAdvancedDropdown(AdvancedDropdownState state_, SerializedObject serialObj_, Action<ExGizmosDrawElement> callback_) : base(state_)
+            public ExGizmosDrawElementAdvancedDropdown(AdvancedDropdownState state_, Action<Type> callback_) : base(state_)
             {
                 minimumSize = new(200, 200);
 
-                m_serialObj = serialObj_;
                 m_callback = callback_;
             }
 
@@ -263,11 +281,11 @@ namespace GaMe.ExMesh
             {
                 var _root = new AdvancedDropdownItem("DrawElements");
 
-                var _elements = s_subClass;
+                var _elements = s_elementsClasses;
 
                 foreach (var element in _elements)
                 {
-                    var _item = new AdvancedDropdownItem(element.GetType().Name);
+                    var _item = new AdvancedDropdownItem(element.Name);
                     m_drawElementsDict.Add(_item.id, element);
                     _root.AddChild(_item);
                 }
