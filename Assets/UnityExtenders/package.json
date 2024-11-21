@@ -4,14 +4,12 @@
   "version": "1.0.0",
   "unity": "2022.2.9",
   "description": "Unity extend packages",
+
   "author": {
     "name": "LeoKawashima"
   },
 
   "keywords": [
-    "shader",
-    "particle",
-    "vfx"
   ],
 
   "dependencies": {
