@@ -1692,7 +1692,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1335975337}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 50, y: 50, z: 0}
+  m_LocalPosition: {x: 0, y: 50, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1809,56 +1809,47 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gizmo:
     m_enabled: 1
-    m_transform: {fileID: 0}
     m_context:
-      Color: {r: 0, g: 1, b: 0, a: 1}
-      Transform: {fileID: 0}
-      Matrix:
-        e00: 5
+      m_color: {r: 0, g: 1, b: 0, a: 1}
+      m_transform: {fileID: 1335975340}
+      m_position: {x: 0, y: 0, z: 0}
+      m_rotation: {x: 0, y: 0, z: 0}
+      m_scale: {x: 1, y: 1, z: 1}
+      m_matrix:
+        e00: 1
         e01: 0
         e02: 0
         e03: 0
         e10: 0
-        e11: 5
+        e11: 1
         e12: 0
-        e13: 20
+        e13: 0
         e20: 0
         e21: 0
-        e22: 5
+        e22: 1
         e23: 0
         e30: 0
         e31: 0
         e32: 0
         e33: 1
-    m_position: {x: 0, y: 0, z: 0}
-    m_rotation: {x: 0, y: 0, z: 0, w: 1}
-    m_scale: {x: 1, y: 1, z: 1}
     m_drawMode: 0
     m_drawElements:
-    - rid: 5977320303258501133
-    - rid: 5977320303258501134
-    - rid: 5977320303258501136
-    - rid: 5977320303258501137
-    - rid: 5977320303258501138
-    - rid: 5977320303258501139
-    - rid: 5977320303258501140
-    - rid: 5977320303258501141
+    - rid: 8598237393381490692
   gizmos: []
-  TS: {fileID: 1335975340}
-  pos: {x: 0, y: 0, z: 50}
-  qua: {x: 0, y: 0, z: 0}
-  sca: {x: 4.58, y: 3.39, z: 5.46}
   references:
     version: 2
     RefIds:
-    - rid: 5977320303258501133
+    - rid: 8598237393381490692
       type: {class: ExGizmosDefaultDrawCube, ns: GaMe.ExMesh, asm: Assembly-CSharp}
       data:
         m_enabled: 1
         m_context:
-          Color: {r: 0, g: 1, b: 0, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
+          m_color: {r: 0, g: 1, b: 0, a: 1}
+          m_transform: {fileID: 0}
+          m_position: {x: 0, y: 4.68, z: 0}
+          m_rotation: {x: 0, y: 0, z: 0}
+          m_scale: {x: 1, y: 1, z: 1}
+          m_matrix:
             e00: 1
             e01: 0
             e02: 0
@@ -1872,207 +1863,12 @@ MonoBehaviour:
             e22: 1
             e23: 0
             e30: 0
-            e31: 0
+            e31: 4.68
             e32: 0
             e33: 1
         m_isWire: 0
-        m_center: {x: -10, y: 0, z: 0}
-        m_size: {x: 1, y: 1, z: 1}
-    - rid: 5977320303258501134
-      type: {class: ExGizmosDefaultDrawSphere, ns: GaMe.ExMesh, asm: Assembly-CSharp}
-      data:
-        m_enabled: 1
-        m_context:
-          Color: {r: 0, g: 1, b: 0, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
-            e00: 1
-            e01: 0
-            e02: 0
-            e03: 0
-            e10: 0
-            e11: 1
-            e12: 0
-            e13: 0
-            e20: 0
-            e21: 0
-            e22: 1
-            e23: 0
-            e30: 0
-            e31: 0
-            e32: 0
-            e33: 1
-        m_isWire: 0
-        m_center: {x: -8, y: 0, z: 0}
-        m_radius: 1
-    - rid: 5977320303258501136
-      type: {class: ExGizmosDefaultDrawMesh, ns: GaMe.ExMesh, asm: Assembly-CSharp}
-      data:
-        m_enabled: 1
-        m_context:
-          Color: {r: 0, g: 1, b: 0, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
-            e00: 1
-            e01: 0
-            e02: 0
-            e03: 0
-            e10: 0
-            e11: 1
-            e12: 0
-            e13: 0
-            e20: 0
-            e21: 0
-            e22: 1
-            e23: 0
-            e30: 0
-            e31: 0
-            e32: 0
-            e33: 1
-        m_isWire: 0
-        m_postion: {x: -6, y: 0, z: 0}
-        m_rotation: {x: 0, y: 0, z: 0, w: 1}
-        m_scale: {x: 1, y: 1, z: 1}
-        m_mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
-        m_subMeshIndex: -1
-    - rid: 5977320303258501137
-      type: {class: ExGizmosDefaultDrawFrustum, ns: GaMe.ExMesh, asm: Assembly-CSharp}
-      data:
-        m_enabled: 1
-        m_context:
-          Color: {r: 1, g: 1, b: 1, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
-            e00: 1
-            e01: 1
-            e02: 0
-            e03: 0
-            e10: 1
-            e11: 1
-            e12: 1
-            e13: 0
-            e20: 0
-            e21: 1
-            e22: 1
-            e23: 0
-            e30: 0
-            e31: 0
-            e32: 0
-            e33: 1
-        m_center: {x: 2.5, y: 0, z: 0}
-        m_fov: 34.76
-        m_maxRange: 7.47
-        m_minRange: 3.9
-        m_aspect: 0.84
-    - rid: 5977320303258501138
-      type: {class: ExGizmosDefaultDrawRay, ns: GaMe.ExMesh, asm: Assembly-CSharp}
-      data:
-        m_enabled: 1
-        m_context:
-          Color: {r: 0, g: 1, b: 0, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
-            e00: 1
-            e01: 0
-            e02: 0
-            e03: 0
-            e10: 0
-            e11: 1
-            e12: 0
-            e13: 0
-            e20: 0
-            e21: 0
-            e22: 1
-            e23: 0
-            e30: 0
-            e31: 0
-            e32: 0
-            e33: 1
-        m_from: {x: 10, y: 10, z: 10}
-        m_direction: {x: 0, y: 0, z: 0}
-    - rid: 5977320303258501139
-      type: {class: ExGizmosDefaultDrawLine, ns: GaMe.ExMesh, asm: Assembly-CSharp}
-      data:
-        m_enabled: 1
-        m_context:
-          Color: {r: 0, g: 1, b: 0, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
-            e00: 1
-            e01: 0
-            e02: 0
-            e03: 0
-            e10: 0
-            e11: 1
-            e12: 0
-            e13: 0
-            e20: 0
-            e21: 0
-            e22: 1
-            e23: 0
-            e30: 0
-            e31: 0
-            e32: 0
-            e33: 1
-        m_from: {x: 0, y: 0, z: 0}
-        m_to: {x: 3.15, y: 2.06, z: 0}
-    - rid: 5977320303258501140
-      type: {class: ExGizmosDefaultDrawLineList, ns: GaMe.ExMesh, asm: Assembly-CSharp}
-      data:
-        m_enabled: 1
-        m_context:
-          Color: {r: 0, g: 1, b: 0, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
-            e00: 1
-            e01: 0
-            e02: 0
-            e03: 0
-            e10: 0
-            e11: 1
-            e12: 0
-            e13: 0
-            e20: 0
-            e21: 0
-            e22: 1
-            e23: 0
-            e30: 0
-            e31: 0
-            e32: 0
-            e33: 1
-        m_points:
-        - {x: 7.82, y: 0, z: 0}
-        - {x: 12.27, y: 5.31, z: 0}
-    - rid: 5977320303258501141
-      type: {class: ExGizmosDefaultDrawLineStrip, ns: GaMe.ExMesh, asm: Assembly-CSharp}
-      data:
-        m_enabled: 1
-        m_context:
-          Color: {r: 0, g: 1, b: 0, a: 1}
-          Transform: {fileID: 0}
-          Matrix:
-            e00: 1
-            e01: 0
-            e02: 0
-            e03: 0
-            e10: 0
-            e11: 1
-            e12: 0
-            e13: 0
-            e20: 0
-            e21: 0
-            e22: 1
-            e23: 0
-            e30: 0
-            e31: 0
-            e32: 0
-            e33: 1
-        m_isLoop: 0
-        m_points:
-        - {x: 4.98, y: 6.13, z: 5.64}
-        - {x: 5.62, y: 1.76, z: -3.94}
-        - {x: 1.81, y: -0.2, z: 0}
-        - {x: 0, y: 1, z: 0}
+        m_center: {x: 0, y: 0, z: 0}
+        m_size: {x: 10, y: 10, z: 10}
 --- !u!43 &1448472082
 Mesh:
   m_ObjectHideFlags: 0

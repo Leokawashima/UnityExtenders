@@ -13,7 +13,7 @@ namespace GaMe.ExMesh
         [SerializeField] private Vector3 m_to = new(1.0f, 0.0f, 0.0f);
         public Vector3 To { get => m_to; set => m_to = value; }
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 
@@ -36,7 +36,7 @@ namespace GaMe.ExMesh
             new Vector3(0.0f, 1.0f, 0.0f),
         };
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 
@@ -63,7 +63,7 @@ namespace GaMe.ExMesh
             new Vector3(0.0f, 1.0f, 0.0f),
         };
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 
@@ -84,7 +84,7 @@ namespace GaMe.ExMesh
         [SerializeField] private Vector3 m_direction = new(1.0f, 0.0f, 0.0f);
         public Vector3 Direction { get => m_direction; set => m_direction = value; }
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 
@@ -108,28 +108,31 @@ namespace GaMe.ExMesh
         [SerializeField] private Vector3 m_size = Vector3.one;
         public Vector3 Size { get => m_size; set => m_size = value; }
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 
             {
                 Gizmos.color = baseContext_.Color * _thisContext.Color;
-                Gizmos.matrix = baseContext_.Matrix * _thisContext.Matrix;
+                if (baseContext_.Transform != null)
+                {
+                    var _transform = baseContext_.Transform;
+                    Gizmos.matrix = Matrix4x4.TRS(_transform.position, _transform.rotation, _transform.lossyScale)
+                        * Matrix4x4.TRS(baseContext_.Position, Quaternion.Euler(baseContext_.Rotation), baseContext_.Scale);
+                }
+                else
+                {
+                    Gizmos.matrix = Matrix4x4.TRS(baseContext_.Position, Quaternion.Euler(baseContext_.Rotation), baseContext_.Scale);
+                }
+                //Gizmos.matrix = baseContext_.Matrix * _thisContext.Matrix;
             }
 
-            Gizmos.DrawCube(m_center, m_size);
-        }
-
-        public void DrawWire(ExGizmosDrawContext baseContext_)
-        {
-            var _thisContext = Context;
-
+            switch (state_)
             {
-                Gizmos.color = baseContext_.Color * _thisContext.Color;
-                Gizmos.matrix = baseContext_.Matrix * _thisContext.Matrix;
+                case DrawState.Default: Gizmos.DrawCube(m_center, m_size); break;
+                case DrawState.ForcePlane: Gizmos.DrawCube(m_center, m_size); break;
+                case DrawState.ForceWire: Gizmos.DrawWireCube(m_center, m_size); break;
             }
-
-            Gizmos.DrawWireCube(m_center, m_size);
         }
     }
 
@@ -144,7 +147,7 @@ namespace GaMe.ExMesh
         [SerializeField] private float m_radius = 1.0f;
         public float Radius { get => m_radius; set => m_radius = value; }
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 
@@ -153,19 +156,12 @@ namespace GaMe.ExMesh
                 Gizmos.matrix = baseContext_.Matrix * _thisContext.Matrix;
             }
 
-            Gizmos.DrawSphere(m_center, m_radius);
-        }
-
-        public void DrawWire(ExGizmosDrawContext baseContext_)
-        {
-            var _thisContext = Context;
-
+            switch (state_)
             {
-                Gizmos.color = baseContext_.Color * _thisContext.Color;
-                Gizmos.matrix = baseContext_.Matrix * _thisContext.Matrix;
+                case DrawState.Default: Gizmos.DrawSphere (m_center, m_radius); break;
+                case DrawState.ForcePlane: Gizmos.DrawSphere(m_center, m_radius); break;
+                case DrawState.ForceWire: Gizmos.DrawWireSphere(m_center, m_radius); break;
             }
-
-            Gizmos.DrawWireSphere(m_center, m_radius);
         }
     }
 
@@ -189,7 +185,7 @@ namespace GaMe.ExMesh
         [SerializeField] private int m_subMeshIndex = -1;
         public int SubMeshIndex { get => m_subMeshIndex; set => m_subMeshIndex = value; }
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 
@@ -198,19 +194,12 @@ namespace GaMe.ExMesh
                 Gizmos.matrix = baseContext_.Matrix * _thisContext.Matrix;
             }
 
-            Gizmos.DrawMesh(m_mesh, m_subMeshIndex, m_postion, m_rotation, m_scale);
-        }
-
-        public void DrawWire(ExGizmosDrawContext baseContext_)
-        {
-            var _thisContext = Context;
-
+            switch (state_)
             {
-                Gizmos.color = baseContext_.Color * _thisContext.Color;
-                Gizmos.matrix = baseContext_.Matrix * _thisContext.Matrix;
+                case DrawState.Default: Gizmos.DrawMesh(m_mesh, m_subMeshIndex, m_postion, m_rotation, m_scale); break;
+                case DrawState.ForcePlane: Gizmos.DrawMesh(m_mesh, m_subMeshIndex, m_postion, m_rotation, m_scale); break;
+                case DrawState.ForceWire: Gizmos.DrawWireMesh(m_mesh, m_subMeshIndex, m_postion, m_rotation, m_scale); break;
             }
-
-            Gizmos.DrawWireMesh(m_mesh, m_subMeshIndex, m_postion, m_rotation, m_scale);
         }
     }
 
@@ -231,7 +220,7 @@ namespace GaMe.ExMesh
         [SerializeField] private float m_aspect = 1.0f;
         public float Aspect { get => m_aspect; set => m_aspect = value; }
 
-        public override void Draw(ExGizmosDrawContext baseContext_)
+        public override void Draw(ExGizmosDrawContext baseContext_, DrawState state_)
         {
             var _thisContext = Context;
 

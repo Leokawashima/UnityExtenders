@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using Unity.VisualScripting;
 #if UNITY_EDITOR
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
@@ -11,33 +9,21 @@ using UnityEngine;
 
 namespace GaMe.ExMesh
 {
+    public enum DrawState
+    {
+        Default,
+        ForcePlane,
+        ForceWire,
+    }
+
     [Serializable]
     public class ExGizmos
     {
         [SerializeField] private bool m_enabled = true;
         public bool Enabled { get => m_enabled; set => m_enabled = value; }
 
-        [SerializeField] private Transform m_transform = null;
-        public Transform Transform { get =>  m_transform; set => m_transform = value; }
-
-        [SerializeField] private ExGizmosDrawContext m_context = ExGizmosDrawContext.Identity;
+        [SerializeField] private ExGizmosDrawContext m_context = new();
         public ExGizmosDrawContext Context { get => m_context; set => m_context = value; }
-
-        [SerializeField] private Vector3 m_position = Vector3.zero;
-        public Vector3 Position { get => m_position; set => m_position = value; }
-
-        [SerializeField] private Quaternion m_rotation = Quaternion.identity;
-        public Quaternion Rotation { get => m_rotation; set => m_rotation = value; }
-
-        [SerializeField] private Vector3 m_scale = Vector3.one;
-        public Vector3 Scale { get => m_scale; set => m_scale = value; }
-
-        public enum DrawState
-        {
-            Default,
-            ForcePlane,
-            ForceWire,
-        }
 
         [SerializeField] private DrawState m_drawMode = DrawState.Default;
         public DrawState DrawMode { get => m_drawMode; set => m_drawMode = value; }
@@ -59,46 +45,18 @@ namespace GaMe.ExMesh
             var _drawElements = gizmos_.m_drawElements;
             foreach (var element in _drawElements)
             {
-                if (element.Enabled)
+                if (false == element.Enabled)
                 {
                     continue;
                 }
 
-                if (element is IExGizmosWire wire)
-                {
-                    switch (gizmos_.DrawMode)
-                    {
-                        case DrawState.Default:
-                            {
-                                if (wire.IsWire)
-                                {
-                                    wire.DrawWire(gizmos_.Context);
-                                }
-                                else
-                                {
-                                    element.Draw(gizmos_.Context);
-                                }
-                                break;
-                            }
-                        case DrawState.ForcePlane:
-                            {
-                                element.Draw(gizmos_.Context);
-                                break;
-                            }
-                        case DrawState.ForceWire:
-                            {
-                                wire.DrawWire(gizmos_.Context);
-                                break;
-                            }
-                    }
-                }
-                else
-                {
-                    element.Draw(gizmos_.m_context);
-                }
+                var _mat = gizmos_.Context;
+                gizmos_.Context.Matrix = Matrix4x4.TRS(_mat.Position, Quaternion.Euler(_mat.Rotation), _mat.Scale);
+                element.Draw(gizmos_.Context, gizmos_.DrawMode);
             }
 
             Gizmos.color = _exColor;
+            Gizmos.matrix = _exMatrix;
         }
     }
 
@@ -118,7 +76,7 @@ namespace GaMe.ExMesh
 
             var _singleLine = ExGizmosEditorUtility.SINGLE_LINE_HEIGHT;
             var _lineHeight = _singleLine + ExGizmosEditorUtility.VERTICAL_SPACING;
-            var _width = EditorGUILayout.GetControlRect().width;
+            var _width = pos_.width;
 
             pos_.height = _singleLine;
 
@@ -158,32 +116,6 @@ namespace GaMe.ExMesh
                 EditorGUI.indentLevel++;
 
                 {
-                    var _prop = prop_.FindPropertyRelative("m_transform");
-                    EditorGUI.ObjectField(pos_, _prop, new GUIContent("Transform"));
-                    pos_.y += _lineHeight;
-                }
-
-                {
-                    var _prop = prop_.FindPropertyRelative("m_position");
-                    _prop.vector3Value = EditorGUI.Vector3Field(pos_, new GUIContent("Position"), _prop.vector3Value);
-                    pos_.y += _lineHeight;
-                }
-
-                {
-                    var _prop = prop_.FindPropertyRelative("m_rotation");
-                    var quat4 = new Vector4(_prop.quaternionValue.x, _prop.quaternionValue.y, _prop.quaternionValue.z, _prop.quaternionValue.w);
-                    var value = EditorGUI.Vector4Field(pos_, new GUIContent("Rotation"), quat4);
-                    _prop.quaternionValue = new Quaternion(value.x, value.y, value.z, value.w);
-                    pos_.y += _lineHeight;
-                }
-
-                {
-                    var _prop = prop_.FindPropertyRelative("m_scale");
-                    _prop.vector3Value = EditorGUI.Vector3Field(pos_, new GUIContent("Scale"), _prop.vector3Value);
-                    pos_.y += _lineHeight;
-                }
-
-                {
                     var _prop = prop_.FindPropertyRelative("m_context");
                     EditorGUI.PropertyField(pos_, _prop);
                     pos_.y += GetPropertyHeight(_prop);
@@ -191,7 +123,7 @@ namespace GaMe.ExMesh
 
                 {
                     var _prop = prop_.FindPropertyRelative("m_drawMode");
-                    _prop.enumValueIndex = EditorGUI.Popup(pos_, "DrawMode", _prop.enumValueIndex, Enum.GetNames(typeof(ExGizmos.DrawState)));
+                    _prop.enumValueIndex = EditorGUI.Popup(pos_, "DrawMode", _prop.enumValueIndex, Enum.GetNames(typeof(DrawState)));
                     pos_.y += _lineHeight;
                 }
 
@@ -244,7 +176,7 @@ namespace GaMe.ExMesh
         public override float GetPropertyHeight(SerializedProperty prop_, GUIContent label_)
         {
             var _lineHeight = ExGizmosEditorUtility.SINGLE_LINE_HEIGHT_SPACING;
-            var _height = 0.0f;
+            var _height = _lineHeight;
 
             if (prop_.isExpanded)
             {
@@ -252,10 +184,6 @@ namespace GaMe.ExMesh
                 {
                     _height += 6;
                 }
-                _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_transform"));
-                _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_position"));
-                _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_rotation"));
-                _height += _lineHeight; // GetPropertyHeight(prop_.FindPropertyRelative("m_scale"));
                 _height += GetPropertyHeight(prop_.FindPropertyRelative("m_context"));
                 _height += _lineHeight; // enum
                 _height += GetPropertyHeight(prop_.FindPropertyRelative("m_drawElements"));
